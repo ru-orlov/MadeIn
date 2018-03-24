@@ -51,6 +51,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private static final int RC_BARCODE_CAPTURE = 9001;
     private static final String PATH_FILE = "countries.csv";
+    private static final String UNKNOWN_CODE = "Unknown code...";
+    private static final String CSV_DELIMITER = ";";
+    private static final String ERROR_READ_FILE = " >>> error on read file...";
+    private static final String BARCODE_READ = "Barcode read: ";
+    private static final String NO_BARCODE_CAPTURED = "No barcode captured, intent data is null";
     private static final String TAG = "BarcodeMain";
 
     @Override
@@ -97,7 +102,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     }
 
-     @Override
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RC_BARCODE_CAPTURE) {
             if (resultCode == CommonStatusCodes.SUCCESS) {
@@ -107,11 +112,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     //barcodeValue.setText(barcode.displayValue);
                     barcodeValue.setText(searchCountry(barcode.displayValue));
 
-
-                    Log.d(TAG, "Barcode read: " + barcode.displayValue);
+                    Log.d(TAG, BARCODE_READ + barcode.displayValue);
                 } else {
                     statusMessage.setText(R.string.barcode_failure);
-                    Log.d(TAG, "No barcode captured, intent data is null");
+                    Log.d(TAG, NO_BARCODE_CAPTURED);
                 }
             } else {
                 statusMessage.setText(String.format(getString(R.string.barcode_error),
@@ -126,12 +130,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected Map<String, String> fileToCollection(){
         BufferedReader br = null;
         String line;
-        String cvsSplitBy = ";";
 
         try {
             br = new BufferedReader(loadAssetTextAsString(PATH_FILE));
             while ((line = br.readLine()) != null) {
-                String[] country = line.split(cvsSplitBy);
+                String[] country = line.split(CSV_DELIMITER);
                 countriesMap.put(country[0], country[2]);
             }
         } catch (IOException e) {
@@ -158,7 +161,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 return countriesMap.get(barcode.substring(0,3));
             }
         }
-        return "Unknown code...";
+        return UNKNOWN_CODE;
     }
 
     public BufferedReader loadAssetTextAsString(String name) {
@@ -166,7 +169,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             InputStreamReader r = new InputStreamReader(getAssets().open(name));
             return new BufferedReader(r);
         } catch (IOException e) {
-            Log.w(MainActivity.class.getName()," >>> error on read file...");
+            Log.w(MainActivity.class.getName(),ERROR_READ_FILE);
         }
         return null;
     }
